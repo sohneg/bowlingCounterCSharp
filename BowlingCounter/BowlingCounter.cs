@@ -8,24 +8,35 @@ public class BowlingCounter
 
 	public void SetupPins()
 	{
-		standingPins = 10;
 		round = 0;
 	}
 
-	public int CalculateLeftOverPins(int knockedOverPins)
+	public int CalculateLeftOverPins(int knockedOverPins, int standingPins)
 	{
-		if (knockedOverPins > 10 || knockedOverPins < 0)
+		if (knockedOverPins > standingPins || knockedOverPins < 0)
 		{
-			throw new ArgumentException("Invalid value for knockedOverPins. The value must be between 0 and 10.");
+			Console.WriteLine("Invalid value for knockedOverPins. The value must be between 0 and 10.");
 		}
-
 		return standingPins - knockedOverPins;
 	}
 
 	public Dictionary<string, PlayerInfo> AddPlayer(string name)
 	{
-		scoreBoard.Add(name, new PlayerInfo());
+        PlayerInfo playerInfo = new()
+        {
+            HasThrows = 2,
+            LastThrowType = ThrowType.None,
+            Score = 0
+        };
+
+        scoreBoard.Add(name, playerInfo);
 		return scoreBoard;
+	}
+
+	public ThrowType SetLastThrowType(PlayerInfo player,ThrowType type)
+	{
+		player.LastThrowType = type;
+		return player.LastThrowType;
 	}
 
 	public bool CheckNumberOfPlayers(int numberOfPlayers)
@@ -46,16 +57,23 @@ public class BowlingCounter
 		}
 		return false;
 	}
+	
+	public void CalculateThrow(){
+		
+	}
 }
 
 public struct PlayerInfo
 {
 	public int Score { get; set; }
-	public ThrorwType LastThrowType { get; set; }
+	public int HasThrows { get; set; }
+	public ThrowType LastThrowType { get; set; }
 }
 
-public enum ThrorwType
+public enum ThrowType
 {
+	None,
+	Normal,
 	Strike,
 	Spare,
 	Miss

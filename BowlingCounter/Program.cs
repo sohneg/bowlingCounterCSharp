@@ -45,28 +45,52 @@ public class Program
         {
             foreach (var player in BC.scoreBoard)
             {
-                Console.WriteLine("It's " + player.Key + "'s turn.");
-                Console.WriteLine("Please enter the number of pins knocked over:");
+                var playerValues = player.Value;
+                playerValues.HasThrows = 2;
+                int currentThorwCounter = 0;
                 int knockedOverPins;
-                while (!int.TryParse(Console.ReadLine(), out knockedOverPins) || knockedOverPins > 10 || knockedOverPins < 0)
-                {
-                    Console.WriteLine("Invalid number of pins knocked over. Please enter a valid number.");
-                }
+                int leftOverPins = 10;
 
-                int leftOverPins = BC.CalculateLeftOverPins(knockedOverPins);
-                Console.WriteLine("Number of pins left over: " + leftOverPins);
-                if (leftOverPins == 0)
+
+                while (currentThorwCounter < playerValues.HasThrows)
                 {
-                    Console.WriteLine("Strike!");
-                }
-                else if (leftOverPins == 10)
-                {
-                    Console.WriteLine("Spare!");
-                }
-                else
-                {
+                    Console.WriteLine("\nIt's " + player.Key + "'s turn.");
+                    Console.WriteLine("Number of throws: " + playerValues.HasThrows);
+                    Console.WriteLine("Last ThrowType: " + playerValues.LastThrowType);
+
+                    Console.WriteLine("Please enter the number of pins knocked over:");
+                    while (!int.TryParse(Console.ReadLine(), out knockedOverPins) || knockedOverPins > 10 || knockedOverPins < 0)
+                    {
+                        Console.WriteLine("Invalid number of pins knocked over. Please enter a valid number.");
+                    }
+
+                    leftOverPins = BC.CalculateLeftOverPins(knockedOverPins, leftOverPins);
+                    Console.WriteLine("Number of pins left over: " + leftOverPins);
+
+                    if (leftOverPins == 0 && playerValues.LastThrowType == ThrowType.None)
+                    {
+                        BC.SetLastThrowType(player.Value, ThrowType.Strike);
+                        Console.WriteLine("### Strike!");
+                        playerValues.HasThrows = 0;
+                    }
+                    else if(leftOverPins > 0){
+                        BC.SetLastThrowType(player.Value, ThrowType.Normal);
+                    }
+                    else if(leftOverPins == 0 && playerValues.LastThrowType == ThrowType.Normal || playerValues.LastThrowType == ThrowType.Miss)
+                    {
+                        BC.SetLastThrowType(player.Value, ThrowType.Spare);
+                        Console.WriteLine("### Spare!");
+                    }
+                    else if (leftOverPins == 10)
+                    {
+                        BC.SetLastThrowType(player.Value, ThrowType.Miss);
+                        Console.WriteLine("### Miss!");
+                    }
+
+                    currentThorwCounter++;
                 }
             }
         }
     }
+
 }
