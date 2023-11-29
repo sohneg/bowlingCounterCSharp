@@ -5,7 +5,6 @@ public class Program
     static readonly BowlingCounter BC = new();
     public static void Main(string[] args)
     {
-
         Console.WriteLine("Welcome to the Bowling Counter!");
         AddPlayerDisplay();
         GameLoop();
@@ -47,16 +46,15 @@ public class Program
             {
                 var playerValues = player.Value;
                 playerValues.HasThrows = 2;
-                int currentThorwCounter = 0;
+                int currentThrowCounter = 0;
                 int knockedOverPins;
                 int leftOverPins = 10;
 
-
-                while (currentThorwCounter < playerValues.HasThrows)
+                while (currentThrowCounter < playerValues.HasThrows)
                 {
                     Console.WriteLine("\nIt's " + player.Key + "'s turn.");
                     Console.WriteLine("Number of throws: " + playerValues.HasThrows);
-                    Console.WriteLine("Last ThrowType: " + playerValues.LastThrowType);
+                    Console.WriteLine("Last ThrowType: " + BC.GetLastThrowType(player.Key));
 
                     Console.WriteLine("Please enter the number of pins knocked over:");
                     while (!int.TryParse(Console.ReadLine(), out knockedOverPins) || knockedOverPins > 10 || knockedOverPins < 0)
@@ -67,30 +65,36 @@ public class Program
                     leftOverPins = BC.CalculateLeftOverPins(knockedOverPins, leftOverPins);
                     Console.WriteLine("Number of pins left over: " + leftOverPins);
 
-                    if (leftOverPins == 0 && playerValues.LastThrowType == ThrowType.None)
+                    // Überprüfen auf Strike
+                    if (leftOverPins == 0 && currentThrowCounter == 0)
                     {
-                        BC.SetLastThrowType(player.Value, ThrowType.Strike);
+                        BC.SetLastThrowType(player.Key, ThrowType.Strike);
                         Console.WriteLine("### Strike!");
                         playerValues.HasThrows = 0;
                     }
-                    else if(leftOverPins > 0){
-                        BC.SetLastThrowType(player.Value, ThrowType.Normal);
-                    }
-                    else if(leftOverPins == 0 && playerValues.LastThrowType == ThrowType.Normal || playerValues.LastThrowType == ThrowType.Miss)
+                    // Überprüfen auf Spare
+                    else if (leftOverPins == 0 && currentThrowCounter == 1)
                     {
-                        BC.SetLastThrowType(player.Value, ThrowType.Spare);
+                        BC.SetLastThrowType(player.Key, ThrowType.Spare);
                         Console.WriteLine("### Spare!");
                     }
+                    // Überprüfen auf Miss
                     else if (leftOverPins == 10)
                     {
-                        BC.SetLastThrowType(player.Value, ThrowType.Miss);
+                        BC.SetLastThrowType(player.Key, ThrowType.Miss);
                         Console.WriteLine("### Miss!");
                     }
+                    // Normale Würfe
+                    else
+                    {
+                        BC.SetLastThrowType(player.Key, ThrowType.Normal);
+                    }
 
-                    currentThorwCounter++;
+                    currentThrowCounter++;
                 }
             }
+
+            // Hier könnten Sie die Punkte für die Runde berechnen und ausgeben, z.B. BC.CalculateScore(player.Key);
         }
     }
-
 }

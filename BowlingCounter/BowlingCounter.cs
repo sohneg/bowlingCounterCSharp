@@ -22,21 +22,36 @@ public class BowlingCounter
 
 	public Dictionary<string, PlayerInfo> AddPlayer(string name)
 	{
-        PlayerInfo playerInfo = new()
-        {
-            HasThrows = 2,
-            LastThrowType = ThrowType.None,
-            Score = 0
-        };
+		PlayerInfo playerInfo = new PlayerInfo
+		{
+			HasThrows = 2,
+			LastThrowType = ThrowType.None,
+			Score = 0
+		};
 
-        scoreBoard.Add(name, playerInfo);
+		scoreBoard.Add(name, playerInfo);
 		return scoreBoard;
 	}
 
-	public ThrowType SetLastThrowType(PlayerInfo player,ThrowType type)
+
+	public ThrowType SetLastThrowType(string player, ThrowType type)
 	{
-		player.LastThrowType = type;
-		return player.LastThrowType;
+		if (scoreBoard.TryGetValue(player, out PlayerInfo playerInfo))
+		{
+			playerInfo.LastThrowType = type;
+			return playerInfo.LastThrowType;
+		}
+
+		return ThrowType.None; // Fallback, wenn der Spieler nicht gefunden wird
+	}
+
+	public ThrowType GetLastThrowType(string player)
+	{
+		if (scoreBoard.TryGetValue(player, out PlayerInfo playerInfo))
+		{
+			return playerInfo.LastThrowType;
+		}
+		return ThrowType.None; // Fallback, if player is not found
 	}
 
 	public bool CheckNumberOfPlayers(int numberOfPlayers)
@@ -57,13 +72,64 @@ public class BowlingCounter
 		}
 		return false;
 	}
-	
-	public void CalculateThrow(){
-		
+
+	public void CalculateThrow(string playerName, int knockedOverPins)
+	{
+		if (scoreBoard.TryGetValue(playerName, out PlayerInfo player))
+		{
+			if (player.HasThrows > 0)
+			{
+				player.HasThrows--;
+
+				if (knockedOverPins == standingPins)
+				{
+					// Strike
+					SetLastThrowType(playerName, ThrowType.Strike);
+					CalculateStrikeBonus(playerName);
+				}
+				else
+				{
+					standingPins = CalculateLeftOverPins(knockedOverPins, standingPins);
+
+					if (player.HasThrows == 0)
+					{
+						if (standingPins == 0)
+						{
+							// Spare
+							SetLastThrowType(playerName, ThrowType.Spare);
+							CalculateSpareBonus(playerName);
+						}
+						else
+						{
+							// Normal throw
+							SetLastThrowType(playerName, ThrowType.Normal);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void CalculateStrikeBonus(string playerName)
+	{
+		// Implement logic to add bonus points for a strike
+	}
+
+	private void CalculateSpareBonus(string playerName)
+	{
+		// Implement logic to add bonus points for a spare
+	}
+
+	public void CalculateScore(string playerName)
+	{
+		if (scoreBoard.TryGetValue(playerName, out PlayerInfo player))
+		{
+			// Implement logic to calculate the total score for the player
+		}
 	}
 }
 
-public struct PlayerInfo
+public class PlayerInfo
 {
 	public int Score { get; set; }
 	public int HasThrows { get; set; }
